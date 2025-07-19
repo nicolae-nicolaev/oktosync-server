@@ -29,7 +29,8 @@ pub async fn register_user(
             eprintln!("Failed to insert user: {err}");
 
             let response = json!({
-                "status": "failure"
+                "status": "failure",
+                "error": format!("Failed to insert user: {err}")
             });
 
             (StatusCode::BAD_REQUEST, Json(response))
