@@ -1,13 +1,24 @@
-pub enum UserRegistrationError {
+pub enum UserRegisterError {
     UsernameTaken,
     EmailTaken,
     InvalidData(String),
     DbError(sqlx::Error),
 }
 
-impl From<sqlx::Error> for UserRegistrationError {
+impl From<sqlx::Error> for UserRegisterError {
     fn from(error: sqlx::Error) -> Self {
-        UserRegistrationError::DbError(error)
+        UserRegisterError::DbError(error)
     }
 }
 
+pub enum UserUpdateError {
+    UserNotFound,
+    InvalidData(String),
+    DbError(sqlx::Error),
+}
+
+impl From<sqlx::Error> for UserUpdateError {
+    fn from(error: sqlx::Error) -> Self {
+        UserUpdateError::DbError(error)
+    }
+}

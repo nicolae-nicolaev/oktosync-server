@@ -1,15 +1,13 @@
 use crate::users::User;
-use crate::users::errors::UserRegistrationError;
+use crate::users::errors::{UserRegisterError, UserUpdateError};
 
-use std::error::Error;
-
-pub async fn add_user(user: &User, pool: &sqlx::PgPool) -> Result<(), UserRegistrationError> {
+pub async fn add_user(user: &User, pool: &sqlx::PgPool) -> Result<(), UserRegisterError> {
     if username_exists(&user.username, pool).await? {
-        return Err(UserRegistrationError::UsernameTaken);
+        return Err(UserRegisterError::UsernameTaken);
     }
 
     if email_exists(&user.email, pool).await? {
-        return Err(UserRegistrationError::EmailTaken);
+        return Err(UserRegisterError::EmailTaken);
     }
 
     let query = "INSERT INTO users (username, email, public_key) VALUES ($1, $2, $3)";
@@ -20,20 +18,7 @@ pub async fn add_user(user: &User, pool: &sqlx::PgPool) -> Result<(), UserRegist
         .bind(&user.public_key)
         .execute(pool)
         .await
-        .map_err(UserRegistrationError::from)?;
-
-    Ok(())
-}
-
-pub async fn update_user(user: &User, pool: &sqlx::PgPool) -> Result<(), Box<dyn Error>> {
-    let query = "UPDATE users SET username = $1, email = $2 WHERE id = $3";
-
-    sqlx::query(query)
-        .bind(&user.username)
-        .bind(&user.email)
-        .bind(user.id)
-        .execute(pool)
-        .await?;
+        .map_err(UserRegisterError::from)?;
 
     Ok(())
 }
