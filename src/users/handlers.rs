@@ -1,4 +1,4 @@
-use crate::users::{NewUser, User, service::*};
+use crate::users::{NewUser, User, errors::UserRegistrationError, service::*};
 
 use oktosync_server::AppState;
 
@@ -25,15 +25,25 @@ pub async fn register_user(
 
             (StatusCode::CREATED, Json(response))
         }
-        Err(err) => {
-            eprintln!("Failed to insert user: {err}");
-
-            let response = json!({
-                "status": "failure",
-                "error": format!("Failed to insert user: {err}")
-            });
-
-            (StatusCode::BAD_REQUEST, Json(response))
-        }
+        Err(err) => match err {
+            UserRegistrationError::UsernameTaken => {
+                let response = json!({"status": "failure", "error": "Username already taken."});
+                (StatusCode::BAD_REQUEST, Json(response))
+            }
+            UserRegistrationError::EmailTaken => {
+                let response = json!({"status": "failure", "error": "Email already taken."});
+                (StatusCode::BAD_REQUEST, Json(response))
+            }
+            UserRegistrationError::InvalidData(message) => {
+                let response =
+                    json!({"status": "failure", "error": format!("Invalid data: {message}")});
+                (StatusCode::BAD_REQUEST, Json(response))
+            }
+            UserRegistrationError::DbError(_) => {
+                let response =
+                    json!({"status": "failure", "error": "Could not connect to the database."});
+                (StatusCode::BAD_REQUEST, Json(response))
+            }
+        },
     }
 }
