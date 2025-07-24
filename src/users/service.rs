@@ -1,5 +1,5 @@
 use crate::users::User;
-use crate::users::errors::{UserRegisterError, UserUpdateError};
+use crate::users::errors::UserRegisterError;
 
 pub async fn add_user(user: &User, pool: &sqlx::PgPool) -> Result<(), UserRegisterError> {
     if username_exists(&user.username, pool).await? {
