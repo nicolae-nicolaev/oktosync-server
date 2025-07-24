@@ -42,7 +42,7 @@ pub async fn register_user(
             UserRegistrationError::DbError(_) => {
                 let response =
                     json!({"status": "failure", "error": "Could not connect to the database."});
-                (StatusCode::BAD_REQUEST, Json(response))
+                (StatusCode::INTERNAL_SERVER_ERROR, Json(response))
             }
         },
     }
