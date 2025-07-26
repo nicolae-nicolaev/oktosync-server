@@ -1,24 +1,13 @@
+use validator::Validate;
+
 use crate::users::User;
 use crate::users::errors::UserRegisterError;
 
 pub async fn add_user(user: &User, pool: &sqlx::PgPool) -> Result<(), UserRegisterError> {
-    if !validator::ValidateEmail::validate_email(&user.email) {
+    if let Err(e) = user.validate() {
         return Err(UserRegisterError::InvalidData(format!(
-            "Invalid email: {}",
-            user.email
+            "Validation error: {e}"
         )));
-    }
-
-    if user.username.is_empty() {
-        return Err(UserRegisterError::InvalidData(
-            "No username provided.".to_string(),
-        ));
-    }
-
-    if user.public_key.is_empty() {
-        return Err(UserRegisterError::InvalidData(
-            "No public key provided.".to_string(),
-        ));
     }
 
     let query = "INSERT INTO users (username, email, public_key) VALUES ($1, $2, $3)";
