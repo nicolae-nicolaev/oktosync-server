@@ -33,9 +33,8 @@ pub async fn register_user(
                 let response = json!({"status": "failure", "error": "Email already taken."});
                 (StatusCode::BAD_REQUEST, Json(response))
             }
-            UserRegisterError::InvalidData(message) => {
-                let response =
-                    json!({"status": "failure", "error": format!("Invalid data: {message}")});
+            UserRegisterError::InvalidData(_) => {
+                let response = json!({"status": "failure", "error": "Invalid input data."});
                 (StatusCode::BAD_REQUEST, Json(response))
             }
             UserRegisterError::DbError(err) => {
