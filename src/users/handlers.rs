@@ -39,7 +39,7 @@ pub async fn register_user(
                 (StatusCode::BAD_REQUEST, Json(response))
             }
             UserRegisterError::DbError(err) => {
-                log::trace!("Database error occurred: {err}");
+                log::debug!("A database error occurred while processing the request: {err}");
                 let response = json!({"status": "failure", "error": "Database operation failed."});
                 (StatusCode::INTERNAL_SERVER_ERROR, Json(response))
             }

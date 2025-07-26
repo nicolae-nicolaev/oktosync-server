@@ -2,43 +2,42 @@ use crate::users::User;
 use crate::users::errors::UserRegisterError;
 
 pub async fn add_user(user: &User, pool: &sqlx::PgPool) -> Result<(), UserRegisterError> {
-    if username_exists(&user.username, pool).await? {
-        return Err(UserRegisterError::UsernameTaken);
+    if !validator::ValidateEmail::validate_email(&user.email) {
+        return Err(UserRegisterError::InvalidData(format!(
+            "Invalid email: {}",
+            user.email
+        )));
     }
 
-    if email_exists(&user.email, pool).await? {
-        return Err(UserRegisterError::EmailTaken);
+    if user.username.is_empty() {
+        return Err(UserRegisterError::InvalidData(
+            "No username provided.".to_string(),
+        ));
+    }
+
+    if user.public_key.is_empty() {
+        return Err(UserRegisterError::InvalidData(
+            "No public key provided.".to_string(),
+        ));
     }
 
     let query = "INSERT INTO users (username, email, public_key) VALUES ($1, $2, $3)";
 
-    sqlx::query(query)
+    let result = sqlx::query(query)
         .bind(&user.username)
         .bind(&user.email)
         .bind(&user.public_key)
         .execute(pool)
-        .await
-        .map_err(UserRegisterError::from)?;
+        .await;
 
-    Ok(())
-}
-
-async fn username_exists(username: &str, pool: &sqlx::PgPool) -> Result<bool, sqlx::Error> {
-    let query = "SELECT EXISTS(SELECT 1 FROM users WHERE username = $1)";
-    let (exists,) = sqlx::query_as::<_, (bool,)>(query)
-        .bind(username)
-        .fetch_one(pool)
-        .await?;
-
-    Ok(exists)
-}
-
-async fn email_exists(email: &str, pool: &sqlx::PgPool) -> Result<bool, sqlx::Error> {
-    let query = "SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)";
-    let (exists,) = sqlx::query_as::<_, (bool,)>(query)
-        .bind(email)
-        .fetch_one(pool)
-        .await?;
-
-    Ok(exists)
+    match result {
+        Ok(_) => Ok(()),
+        Err(sqlx::Error::Database(db_err)) if db_err.constraint() == Some("users_username_key") => {
+            Err(UserRegisterError::UsernameTaken)
+        }
+        Err(sqlx::Error::Database(db_err)) if db_err.constraint() == Some("users_email_key") => {
+            Err(UserRegisterError::EmailTaken)
+        }
+        Err(e) => Err(UserRegisterError::from(e)),
+    }
 }
