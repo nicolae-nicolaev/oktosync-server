@@ -2,10 +2,9 @@ use crate::users::{NewUser, User, errors::UserRegisterError, service::*};
 
 use oktosync_server::AppState;
 
-use axum::{Json, debug_handler, extract::State, http::StatusCode, response::IntoResponse};
+use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
 use serde_json::json;
 
-#[debug_handler]
 pub async fn register_user(
     State(state): State<AppState>,
     Json(payload): Json<NewUser>,
@@ -39,7 +38,8 @@ pub async fn register_user(
                     json!({"status": "failure", "error": format!("Invalid data: {message}")});
                 (StatusCode::BAD_REQUEST, Json(response))
             }
-            UserRegisterError::DbError(_) => {
+            UserRegisterError::DbError(err) => {
+                log::trace!("Database error occurred: {err}");
                 let response = json!({"status": "failure", "error": "Database operation failed."});
                 (StatusCode::INTERNAL_SERVER_ERROR, Json(response))
             }
