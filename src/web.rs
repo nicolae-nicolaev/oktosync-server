@@ -68,8 +68,6 @@ pub mod handlers {
             Err(_) => PathBuf::from("uploads"),
         };
 
-        let upload_path = upload_dir;
-
         // Normalize relative path
         let mut clean_path = PathBuf::new();
         for component in Path::new(file_path).components() {
@@ -91,9 +89,27 @@ pub mod handlers {
             }
         }
 
-        let final_path = upload_path.join(&clean_path);
+        let final_path = upload_dir.join(&clean_path);
 
-        if !final_path.starts_with(upload_path) {
+        let final_path_canonicalized = match final_path.canonicalize() {
+            Ok(path) => path,
+            Err(_) => {
+                return Err(std::io::Error::other(
+                    "🚫 Error processing upload directory",
+                ));
+            }
+        };
+
+        let upload_dir_canonicalized = match upload_dir.canonicalize() {
+            Ok(path) => path,
+            Err(_) => {
+                return Err(std::io::Error::other(
+                    "🚫 Error processing upload directory",
+                ));
+            }
+        };
+
+        if !final_path_canonicalized.starts_with(upload_dir_canonicalized) {
             return Err(std::io::Error::new(
                 std::io::ErrorKind::PermissionDenied,
                 "🚫 Path escapes upload directory",
