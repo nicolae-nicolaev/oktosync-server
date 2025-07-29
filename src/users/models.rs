@@ -49,9 +49,17 @@ fn is_valid_pem_key(key: &str) -> bool {
         .unwrap_or(false)
 }
 
+const ED25519_LEN: usize = 32;
+const ED25519_P_LEN: usize = 33;
+const SECP256R1_LEN: usize = 64;
+const ED25519_C_LEN: usize = 65;
+
 fn is_valid_base64_raw_key(key: &str) -> bool {
     match general_purpose::STANDARD.decode(key) {
-        Ok(bytes) => matches!(bytes.len(), 32 | 33 | 64 | 65),
+        Ok(bytes) => matches!(
+            bytes.len(),
+            ED25519_LEN | ED25519_P_LEN | SECP256R1_LEN | ED25519_C_LEN
+        ),
         Err(_) => false,
     }
 }

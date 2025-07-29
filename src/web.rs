@@ -51,8 +51,24 @@ pub mod handlers {
     }
 
     async fn save_file(file_path: &str, data: Bytes) -> std::io::Result<()> {
-        let upload_dir = &std::env::var("OKTOSYNC_UPLOAD_DIR").unwrap_or("uploads".to_string());
-        let upload_path = Path::new(upload_dir);
+        let upload_dir = match std::env::var("OKTOSYNC_UPLOAD_DIR") {
+            Ok(dir) => {
+                let path = Path::new(&dir);
+                if path.is_absolute()
+                    && !path.components().any(|c| matches!(c, Component::ParentDir))
+                {
+                    path.to_path_buf()
+                } else {
+                    eprintln!(
+                        "⚠️ Invalid upload directory in OKTOSYNC_UPLOAD_DIR. Falling back to default."
+                    );
+                    PathBuf::from("uploads")
+                }
+            }
+            Err(_) => PathBuf::from("uploads"),
+        };
+
+        let upload_path = upload_dir;
 
         // Normalize relative path
         let mut clean_path = PathBuf::new();
