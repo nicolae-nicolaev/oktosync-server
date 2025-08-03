@@ -20,7 +20,9 @@ pub struct DatabaseConfig {
 }
 
 pub fn load_config() -> Result<Settings, ConfigError> {
-    dotenv().ok();
+    if let Err(err) = dotenv() {
+        log::warn!("⚠️ Failed to load .env file: {err}");
+    }
 
     let builder = Config::builder()
         .add_source(File::with_name("config/default").required(false))
