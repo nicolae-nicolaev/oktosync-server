@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres
+    container_name: oktosync-db
+    environment:
+      POSTGRES_DB: oktosyncdb
+      POSTGRES_USER: okto
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
+    secrets:
+      - pg_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U okto -d oktosyncdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  server:
+    build:
+      context: .
+    container_name: oktosync-server
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - 3000:3000
+    environment:
+      OKTOSYNC_SERVER__HOST: "0.0.0.0"
+      OKTOSYNC_SERVER__PORT: "3000"
+    secrets:
+      - pg_password
+    command: >
+      /bin/sh -lc '
+        export PG_PASSWORD="$$(cat /run/secrets/pg_password)" &&
+        export DATABASE_URL="postgres://okto:$${PG_PASSWORD}@db:5432/oktosyncdb" &&
+        exec /usr/local/bin/oktosync-server
+      '
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+secrets:
+  pg_password:
+    file: ./secrets/pg_password.txt
+
+volumes:
+  db_data:
+

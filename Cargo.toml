@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 axum = { version = "0.8.4", features = ["multipart", "macros"] }
 base64 = "0.22.1"
-config = "0.15.13"
+config = { version = "0.15.13", features = ["yaml"] }
 dotenvy = "0.15.7"
 log = "0.4.27"
 pem = "3.0.5"
