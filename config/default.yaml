@@ -1,5 +1,7 @@
 server:
-  host: "127.0.0.1"
+  host: "0.0.0.0"
   port: 3000
 database:
-  database_url: "postgres://postgres:password@localhost/dev_db" # Default to local PostgreSQL. Change as needed for production.
+  # IMPORTAN! This is used exclusively for dev deploy and should not be used in prod.
+  # For production environments set the DATABASE_URL or OKTOSYNC_DB__URL environment variables instead.
+  url: "postgres://user:secret@localhost:5432/oktosyncdb"

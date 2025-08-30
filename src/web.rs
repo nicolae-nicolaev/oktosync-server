@@ -8,6 +8,10 @@ pub mod handlers {
         "🐙 Welcome to OktoSync!"
     }
 
+    pub async fn health() -> &'static str {
+        "👌 Up an running!"
+    }
+
     pub async fn upload(mut multipart: Multipart) {
         let mut file_data: Option<Bytes> = None;
         let mut relative_path: Option<String> = None;
