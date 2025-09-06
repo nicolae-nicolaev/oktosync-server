@@ -1,4 +1,54 @@
-# oktosync-server
+# Oktosync Server
+
+[![GitHub repo](https://img.shields.io/badge/github-nicolae--nicolaev/oktosync--server-18ffd8?style=flat-square&logo=github)](https://github.com/nicolae-nicolaev/oktosync-server)
+
+Oktosync is an open-source, self-hostable file sync system.  
+This repository contains the **server component**, which provides the APIs and storage backend for Oktosync clients.
+
+⚠️ **Status:** Work in Progress. Expect breaking changes until v1.0.0.
+
+---
+
+## Roadmap & Releases
+
+We are incrementally developing Oktosync Server.  
+Below is the planned release roadmap. Each milestone will be tagged and documented as a [GitHub Release](https://github.com/nicolae-nicolaev/oktosync-server/releases).
+
+### v0.1.0 – MVP Auth (current)
+- ✅ User model (users, credentials, sessions)
+- ✅ Signup, login, logout endpoints
+- ✅ `/health` endpoint
+
+### v0.2.0 – File Upload
+- [ ] Prepare-upload API (check missing chunks by hash)
+- [ ] Chunk storage (S3/MinIO support)
+- [ ] Commit file manifests
+
+### v0.3.0 – Sync Basics
+- [ ] Change tracking
+- [ ] Conflict handling
+- [ ] Version history
+
+### v0.4.0 – Devices
+- [ ] Device registration (one row per client)
+- [ ] Sessions tied to devices
+- [ ] Device revocation
+
+### v0.5.0 – Shared Spaces (experimental)
+- [ ] Space model (private/shared)
+- [ ] Membership management
+- [ ] Encrypted Space Root Keys (SRKs)
+
+---
+
+## Contributing
+
+Contributions, ideas, and feedback are welcome!  
+Open an [issue](https://github.com/nicolae-nicolaev/oktosync-server/issues) or start a [discussion](https://github.com/nicolae-nicolaev/oktosync-server/discussions).
+
+---
+
+## Description
 
 Oktosync is a secure, server–client file synchronization platform written in Rust (Axum).  
 This repository contains the **server** component (API + DB access + migrations).
@@ -38,8 +88,6 @@ After up the server should be available at:
 ```bash
 http://127.0.0.1:3000/
 http://127.0.0.1:3000/health
-```
-```
 ```
 
 ## Manual (docker compose)
